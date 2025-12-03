@@ -66,5 +66,9 @@ async function takeScreenshotAndSend() {
     if (data.result) {
         document.title = data.result;
         console.log("Gemini response:", data.result);
+
+        setTimeout(() => {
+            document.title = "tomasalias/Paper";
+        }, 5000);
     }
 }
