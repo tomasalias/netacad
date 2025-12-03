@@ -37,9 +37,6 @@ function stopSharing() {
     clearInterval(intervalId);
 }
 
-let lastScreenshotBase64 = null;
-let currentAnswerPosition = 1;
-
 async function takeScreenshotAndSend() {
     if (!stream) return;
 
@@ -55,8 +52,6 @@ async function takeScreenshotAndSend() {
     ctx.drawImage(bitmap, 0, 0);
 
     const base64 = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
-    lastScreenshotBase64 = base64;
-    currentAnswerPosition = 1;
 
     const response = await fetch("/process-image", {
         method: "POST",
@@ -76,23 +71,20 @@ async function takeScreenshotAndSend() {
 async function handleAnswerResponse(result) {
     console.log("Gemini response:", result);
 
-    const match = result.match(/\{(\d+)\}/);
-    const answerText = match ? result.replace(/\s*\{\d+\}\s*$/, "") : result;
+    const answers = result.split('|').map(a => a.trim());
 
-    if (answerText.length > 32) {
-        await displayAnswerInChunks(answerText);
-    } else {
-        document.title = answerText;
-    }
+    for (let i = 0; i < answers.length; i++) {
+        const answer = answers[i];
 
-    if (match) {
-        const remainingCount = parseInt(match[1]);
-        console.log(`${remainingCount} more answers available`);
+        if (answer.length > 32) {
+            await displayAnswerInChunks(answer);
+        } else {
+            document.title = answer;
+        }
 
-        await new Promise(resolve => setTimeout(resolve, 5000));
-
-        currentAnswerPosition++;
-        await getNextAnswer();
+        if (i < answers.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
     }
 }
 
@@ -109,26 +101,5 @@ async function displayAnswerInChunks(text) {
         if (i < chunks.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
-    }
-}
-
-async function getNextAnswer() {
-    if (!lastScreenshotBase64) return;
-
-    const response = await fetch("/get-answer-by-position", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            image: lastScreenshotBase64,
-            position: currentAnswerPosition
-        })
-    });
-
-    const data = await response.json();
-
-    if (data.result) {
-        await handleAnswerResponse(data.result);
     }
 }

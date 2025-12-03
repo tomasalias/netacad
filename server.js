@@ -18,50 +18,12 @@ app.post("/process-image", async (req, res) => {
                     {
                         parts: [
                             {
-                                text: "Analyze the screenshot and provide only the answer to the question according to the options. Don't write 'The answer is' or 'The answer to the question is', just provide the answer. ONLY if the question explicitly contains text like '(Choose two.)' or '(Choose three.)', add the total count in braces like {2} or {3} at the end of your response."
+                                text: "Analyze the screenshot and provide only the answer(s) to the question according to the options. Don't write 'The answer is' or 'The answer to the question is', just provide the answer(s). If the question contains '(Choose two.)' or '(Choose three.)' etc., provide all correct answers separated by the | character (e.g., 'Answer1|Answer2|Answer3')."
                             },
                             {
                                 inlineData: {
                                     mimeType: "image/png",
                                     data: imageBase64
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                params: { key: process.env.GEMINI_API_KEY }
-            }
-        );
-
-        const text = result.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No result";
-
-        res.json({ result: text });
-
-    } catch (err) {
-        console.error(err.response?.data || err.message);
-        res.json({ result: "Error processing image" });
-    }
-});
-
-app.post("/get-answer-by-position", async (req, res) => {
-    const { image, position } = req.body;
-
-    try {
-        const result = await axios.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-            {
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: `Analyze the screenshot and provide only the answer that is in position ${position} from the top (counting from 1). Don't write 'The answer is', just provide the answer text. ONLY if the question contains '(Choose two.)' or '(Choose three.)' etc., and there are more answers remaining after this one, add the remaining count in braces like {1} at the end.`
-                            },
-                            {
-                                inlineData: {
-                                    mimeType: "image/png",
-                                    data: image
                                 }
                             }
                         ]
