@@ -18,7 +18,7 @@ app.post("/process-image", async (req, res) => {
                     {
                         parts: [
                             {
-                                text: "Analyze the screenshot and provide only the answer to the question according to the options."
+                                text: "Analyze the screenshot and provide only the answer to the question according to the options. Don't write 'The answer is' or 'The answer to the question is', just provide the answer."
                             },
                             {
                                 inlineData: {
