@@ -18,7 +18,7 @@ app.post("/process-image", async (req, res) => {
                     {
                         parts: [
                             {
-                                text: "Analyze the screenshot and provide only the answer to the question according to the options. Don't write 'The answer is' or 'The answer to the question is', just provide the answer. If there are multiple correct answers, add the total count in braces like {3} at the end of your response."
+                                text: "Analyze the screenshot and provide only the answer to the question according to the options. Don't write 'The answer is' or 'The answer to the question is', just provide the answer. ONLY if the question explicitly contains text like '(Choose two.)' or '(Choose three.)', add the total count in braces like {2} or {3} at the end of your response."
                             },
                             {
                                 inlineData: {
@@ -56,7 +56,7 @@ app.post("/get-answer-by-position", async (req, res) => {
                     {
                         parts: [
                             {
-                                text: `Analyze the screenshot and provide only the answer that is in position ${position} from the top (counting from 1). Don't write 'The answer is', just provide the answer text. If there are more answers remaining after this one, add the count in braces like {2} at the end.`
+                                text: `Analyze the screenshot and provide only the answer that is in position ${position} from the top (counting from 1). Don't write 'The answer is', just provide the answer text. ONLY if the question contains '(Choose two.)' or '(Choose three.)' etc., and there are more answers remaining after this one, add the remaining count in braces like {1} at the end.`
                             },
                             {
                                 inlineData: {

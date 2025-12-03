@@ -74,10 +74,17 @@ async function takeScreenshotAndSend() {
 }
 
 async function handleAnswerResponse(result) {
-    document.title = result;
     console.log("Gemini response:", result);
 
     const match = result.match(/\{(\d+)\}/);
+    const answerText = match ? result.replace(/\s*\{\d+\}\s*$/, "") : result;
+
+    if (answerText.length > 32) {
+        await displayAnswerInChunks(answerText);
+    } else {
+        document.title = answerText;
+    }
+
     if (match) {
         const remainingCount = parseInt(match[1]);
         console.log(`${remainingCount} more answers available`);
@@ -86,6 +93,22 @@ async function handleAnswerResponse(result) {
 
         currentAnswerPosition++;
         await getNextAnswer();
+    }
+}
+
+async function displayAnswerInChunks(text) {
+    const chunkSize = 32;
+    const chunks = [];
+    
+    for (let i = 0; i < text.length; i += chunkSize) {
+        chunks.push(text.substring(i, i + chunkSize));
+    }
+
+    for (let i = 0; i < chunks.length; i++) {
+        document.title = chunks[i];
+        if (i < chunks.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
     }
 }
 
