@@ -37,6 +37,9 @@ function stopSharing() {
     clearInterval(intervalId);
 }
 
+let lastScreenshotBase64 = null;
+let currentAnswerPosition = 1;
+
 async function takeScreenshotAndSend() {
     if (!stream) return;
 
@@ -52,6 +55,8 @@ async function takeScreenshotAndSend() {
     ctx.drawImage(bitmap, 0, 0);
 
     const base64 = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+    lastScreenshotBase64 = base64;
+    currentAnswerPosition = 1;
 
     const response = await fetch("/process-image", {
         method: "POST",
@@ -64,11 +69,43 @@ async function takeScreenshotAndSend() {
     const data = await response.json();
 
     if (data.result) {
-        document.title = data.result;
-        console.log("Gemini response:", data.result);
+        await handleAnswerResponse(data.result);
+    }
+}
 
-        setTimeout(() => {
-            document.title = "tomasalias/Paper";
-        }, 5000);
+async function handleAnswerResponse(result) {
+    document.title = result;
+    console.log("Gemini response:", result);
+
+    const match = result.match(/\{(\d+)\}/);
+    if (match) {
+        const remainingCount = parseInt(match[1]);
+        console.log(`${remainingCount} more answers available`);
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        currentAnswerPosition++;
+        await getNextAnswer();
+    }
+}
+
+async function getNextAnswer() {
+    if (!lastScreenshotBase64) return;
+
+    const response = await fetch("/get-answer-by-position", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            image: lastScreenshotBase64,
+            position: currentAnswerPosition
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.result) {
+        await handleAnswerResponse(data.result);
     }
 }
