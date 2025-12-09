@@ -20,7 +20,7 @@ async function startSharing() {
         video.srcObject = stream;
         btn.textContent = "Stop Screen Sharing";
 
-        intervalId = setInterval(takeScreenshotAndSend, 10000);
+        intervalId = setInterval(takeScreenshotAndSend, 20000);
 
     } catch (err) {
         console.error("Screen share error:", err);
