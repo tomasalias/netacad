@@ -12,7 +12,7 @@ app.post("/process-image", async (req, res) => {
 
     try {
         const result = await axios.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent",
             {
                 contents: [
                     {
